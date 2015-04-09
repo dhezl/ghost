@@ -13,7 +13,7 @@ apt-get install -y build-essential libssl-dev monit unzip vim curl ntp redis-ser
 service ntp restart
 
 # install ngrok
-wget -qO /tmp/ngrok.zip https://api.equinox.io/1/Applications/ap_pJSFC5wQYkAyI0FIVwKYs9h1hW/Updates/Asset/ngrok.zip?os=linux&arch=386&channel=stable
+wget -qO /tmp/ngrok.zip "https://api.equinox.io/1/Applications/ap_pJSFC5wQYkAyI0FIVwKYs9h1hW/Updates/Asset/ngrok.zip?os=linux&arch=386&channel=stable"
 unzip /tmp/ngrok.zip
 mv ngrok /usr/local/bin/ngrok
 
