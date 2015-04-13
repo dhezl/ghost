@@ -1,6 +1,10 @@
 var ack = require('ac-koa').require('hipchat');
 var pkg = require('./package.json');
+var Client = require('node-rest-client').Client;
 var app = ack(pkg);
+var qaUser = 'meganb'
+var jiraApiUrl = "https://razorfish-central.atlassian.net/rest/api/2/"
+var authHeader = {"authorization": "Basic ZGF2aWRoZXpsZXA6T2xpdmVyMDAh", "Content-Type": "application/json"}
 
 var addon = app.addon()
   .hipchat()
@@ -9,26 +13,14 @@ var addon = app.addon()
 
 var http = require('http');
 
-// curl -u davidhezlep:Oliver00! https://razorfish-central.atlassian.net/rest/api/2/issue/CFVI-7
+client = new Client();
 
-// curl -u davidhezlep:Oliver00! https://razorfish-central.atlassian.net/rest/api/2/search?jql=assignee%3Ddavidhezlep%20AND%20project%3DCFVI%20AND%20status%3Dresolved
-var jiraApiUrl = "https://razorfish-central.atlassian.net/rest/api/2/"
+
 
 if (process.env.DEV_KEY) {
   addon.key(process.env.DEV_KEY);
 }
 
-// addon.webhook('room_message', function *() {
-//   if(this.message.indexOf('/hello') > -1) {
-//     yield this.roomClient.sendNotification('Hi, '+this.sender.name+'!');
-//   }
-
-//   if(this.message.indexOf('/timeline') > -1) {
-//     yield this.roomClient.sendNotification('Batch 1 (THD US, BBY, WL): <br> Dev complete: 5/1 <br> Handoff: 5/8 <br><br> Batch 2 (SEARS, SHELL, Marketing 1): <br> Dev complete: 5/20 <br> Handoff: 5/29');
-//   }
-
-// });
- 
 addon.webhook('room_message', /^\/timeline$/, function *() {
   yield this.roomClient.sendNotification('<b>Batch 1 (THD US, BBY, WL):</b> <br> Dev complete: 5/1 <br> Handoff: 5/8 <br><br> <b>Batch 2 (SEARS, SHELL, Marketing 1):</b> <br> Dev complete: 5/20 <br> Handoff: 5/29');
 });
@@ -38,12 +30,45 @@ addon.webhook('room_message', /^\/hello$/, function *() {
 });
 
 addon.webhook('room_message', /^.*deployed.*$/, function *() {
-  yield this.roomClient.sendNotification('DEPLOYED!');
-})
+  if (this.message.message.indexOf('Fusion: White Label (Staging)') > 0) {
+    yield this.roomClient.sendNotification('Sending resolved White Label tickets to '+qaUser+'...');
+    getTickets('CFVI-1');
+  }
+
+  if (this.message.message.indexOf('Fusion: The Home Depot: US (Staging)') > 0) {
+    yield this.roomClient.sendNotification('Sending resolved THD-US tickets to '+qaUser+'...');
+    getTickets('CFVI-14')
+  }
+
+  if (this.message.message.indexOf('Fusion: Best Buy (Dev)') > 0) {
+    yield this.roomClient.sendNotification('Sending resolved BBY tickets to '+qaUser+'...');
+    getTickets('CFVI-15')
+  }
+  
+});
+
+function getTickets(epicLink) {
+  args = {
+    headers: authHeader
+  };
+  returnArray = []
+  client.get(jiraApiUrl+'search?jql=assignee%3Ddavidhezlep%20AND%20project%3DCFVI%20AND%20status%3Dresolved%20AND%20%22Epic%20Link%22%20%3D'+epicLink, args, function(data, response) {
+    for(var i = 0; i < data.issues.length; i ++) {
+      assignTicket(data.issues[i].key);
+    }
+  });
+}
+
+function assignTicket(ticketID) {
+  args = {
+    data: { fields: { assignee: {name: qaUser} } },
+    headers: authHeader
+  };
+  client.put(jiraApiUrl+'issue/'+ticketID, args, function(data, response){
+    console.log(data);
+  });
+}
 
 
-// addon.webhook('room_message',  function *() {
-//   yield this.roomClient.sendNotification("test");
-// }); 
  
 app.listen();
