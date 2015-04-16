@@ -22,30 +22,42 @@ if (process.env.DEV_KEY) {
 }
 
 addon.webhook('room_message', /^\/timeline$/, function *() {
-  yield this.roomClient.sendNotification('<b>Batch 1 (THD US, BBY, WL):</b> <br> Dev complete: 5/1 <br> Handoff: 5/8 <br><br> <b>Batch 2 (SEARS, SHELL, Marketing 1):</b> <br> Dev complete: 5/20 <br> Handoff: 5/29');
+  yield this.roomClient.sendNotification('<b>Batch 1 (THD US, BBY, WL):</b> <br> CRUX review: 5/1 <br> Code review: 5/4 <br> QA review: 5/5-7 <br> Handoff: 5/8 <br><br> <b>Batch 2 (SEARS, SHELL, Marketing 1):</b> <br> Dev complete: 5/20 <br> Handoff: 5/29');
 });
 
 addon.webhook('room_message', /^\/hello$/, function *() {
   yield this.roomClient.sendNotification('Hi, '+this.sender.name+'!');
 });
 
-addon.webhook('room_message', /^.*deployed.*$/, function *() {
-  if (this.message.message.indexOf('Fusion: White Label (Staging)') > 0) {
-    yield this.roomClient.sendNotification('Sending resolved White Label tickets to '+qaUser+'...');
-    getTickets('CFVI-1');
-  }
-
-  if (this.message.message.indexOf('Fusion: The Home Depot: US (Staging)') > 0) {
-    yield this.roomClient.sendNotification('Sending resolved THD-US tickets to '+qaUser+'...');
-    getTickets('CFVI-14')
-  }
-
-  if (this.message.message.indexOf('Fusion: Best Buy (Dev)') > 0) {
-    yield this.roomClient.sendNotification('Sending resolved BBY tickets to '+qaUser+'...');
-    getTickets('CFVI-15')
-  }
-  
+addon.webhook('room_message', /^\/konnichiwa$/, function *() {
+  yield this.roomClient.sendNotification('今日は, '+this.sender.name+', 元気ですか?');
 });
+
+addon.webhook('room_message', /^\/howdy$/, function *() {
+  yield this.roomClient.sendNotification('Tarnation, '+this.sender.name+', there\'s a snake in my boot!');
+});
+
+
+addon.webhook('room_notification', function*() {
+  if (this.content.indexOf('deployed') > 0) {
+
+    if (this.content.indexOf('Fusion: White Label (Staging)') > 0) {
+      yield this.roomClient.sendNotification('Sending resolved White Label tickets to '+qaUser+'...');
+      getTickets('CFVI-1');
+    }
+
+    if (this.content.indexOf('Fusion: The Home Depot: US (Staging)') > 0) {
+      yield this.roomClient.sendNotification('Sending resolved THD-US tickets to '+qaUser+'...');
+      getTickets('CFVI-14')
+    }
+
+    if (this.content.indexOf('Fusion: Best Buy (Dev)') > 0) {
+      yield this.roomClient.sendNotification('Sending resolved BBY tickets to '+qaUser+'...');
+      getTickets('CFVI-15')
+    }
+  }
+});
+
 
 function getTickets(epicLink) {
   args = {
