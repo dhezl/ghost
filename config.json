@@ -1,0 +1,30 @@
+{
+  "developers": [
+    "davidhezlep", 
+    "KevinMorgan", 
+    "britneyjo"],
+
+  "shell": {
+    "epic": "CFVI-17",
+    "component": "Shell",
+    "strings": ["Shell", "shell", "SHELL"]
+  },
+
+  "bestbuy": {
+    "epic": "CFVI-15",
+    "component": "Best Buy",
+    "strings": ["BBY", "BB", "BestBuy", "BEST BUY"]
+  },
+
+  "thd_us": {
+    "epic": "CFVI-14",
+    "component": "THD US",
+    "strings": ["Home Depot", "THD"]
+  },
+  
+  "sears": {
+    "epic": "CFVI-16",
+    "component": "Sears",
+    "strings": ["SEARS", "Sears", "sears", "SRS"]
+  }
+}
